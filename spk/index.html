@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemilihan Model ML</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+    <style>
+        /* Reset CSS Sederhana */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A; /* Warna latar belakang utama (biru sangat gelap) */
+            color: #E2E8F0; /* Warna teks utama (putih keabuan) */
+            line-height: 1.6;
+        }
+
+        /* Kontainer Utama */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #020617;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center; /* Center align logo and text */
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Hamburger Menu Toggle - Ditambahkan */
+        .navbar-toggle {
+            display: none; /* Sembunyikan di desktop */
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .navbar-toggle svg {
+            width: 30px;
+            height: 30px;
+            fill: #E2E8F0;
+        }
+
+        .search-container {
+            position: relative;
+            margin-right: 40px;
+        }
+
+        .search-input {
+            background-color: #334155;
+            color: #E2E8F0;
+            border: 1px solid #475569;
+            border-radius: 20px;
+            padding: 8px 15px 8px 35px;
+            font-size: 0.9em;
+            width: 200px;
+        }
+        .search-input::placeholder {
+            color: #94A3B8;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #60A5FA;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            fill: #94A3B8;
+        }
+        .search-results-info {
+            font-size: 0.8em;
+            color: #94a3b8;
+            margin-left: 5px;
+            display: none; /* Sembunyikan awal */
+        }
+
+
+        .contact-btn {
+            background-image: linear-gradient(to right, #6D28D9, #4F46E5);
+            color: #FFFFFF;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            margin-right: 20px;
+            transition: filter 0.2s ease;
+        }
+        .contact-btn:hover {
+            filter: brightness(1.2);
+        }
+
+        .nav-links a {
+            color: #CBD5E1;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 0.9em;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background-color: #334155;
+            color: #FFFFFF;
+        }
+
+        /* Card Styling */
+        .card {
+            background-image: linear-gradient(to bottom, #2B2C61, #123F60); /* Gradient sesuai permintaan */
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Container untuk judul utama dan tombol contoh input - Ditambahkan */
+        .main-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Memastikan bisa wrap jika perlu */
+            gap: 15px; /* Jarak antara judul dan tombol */
+        }
+        
+        .main-title-container .card-title {
+             margin-bottom: 0;
+             text-align: left;
+             flex-grow: 1; /* Biarkan judul mengambil ruang yang tersedia */
+        }
+
+        .card-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #FFFFFF;
+        }
+         .card-header-flex { /* Untuk mensejajarkan judul card dan tombol reset riwayat */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px; /* Sesuaikan dengan margin-bottom card-title asli */
+        }
+        .card-header-flex .card-title {
+            margin-bottom: 0; /* Hapus margin bawah dari judul jika di dalam flex */
+            text-align: left; /* Agar judul rata kiri saat ada tombol di kanan */
+        }
+
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #CBD5E1;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #94A3B8;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #E2E8F0;
+            font-size: 0.9em;
+        }
+        .input-field::placeholder {
+            color: #94A3B8;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+        }
+        .input-field.is-invalid {
+            border-color: #F87171; /* Merah untuk error */
+            box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.3);
+        }
+
+
+        /* Alternatif Input Grid */
+        .alternatif-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(6, 1fr);
+            gap: 10px;
+            align-items: center;
+            background-color: #0F172A;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .alternatif-grid .input-field {
+            text-align: center;
+        }
+        .alternatif-grid .input-field[type="text"] {
+            text-align: left;
+        }
+
+
+        /* Buttons */
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+            align-items: center;
+        }
+        .button-container.space-between {
+            justify-content: space-between;
+        }
+
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: filter 0.2s ease, box-shadow 0.2s ease;
+            color: #FFFFFF;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+        }
+        .btn:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background-image: linear-gradient(to right, #3B82F6, #2563EB);
+        }
+
+        .btn-primary {
+            background-image: linear-gradient(to right, #2563EB, #1D4ED8);
+        }
+        
+        .btn-reset {
+             background-image: linear-gradient(to right, #4F46E5, #4338CA);
+        }
+        .btn-danger {
+            background-image: linear-gradient(to right, #EF4444, #DC2626);
+        }
+        .btn-warning { /* Untuk tombol Reset Riwayat */
+             background-image: linear-gradient(to right, #F59E0B, #D97706);
+        }
+        .btn-success {
+            background-image: linear-gradient(to right, #10B981, #059669);
+        }
+
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        table.dataTable {
+            width: 100% !important;
+            margin: 0 auto;
+            clear: both;
+            border-collapse: collapse !important;
+            background-color: #1E293B;
+        }
+        table.dataTable th,
+        table.dataTable td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #334155;
+            color: #CBD5E1;
+            text-align: center; /* Center text in all cells */
+        }
+        table.dataTable thead th {
+            background-color: #0F172A;
+            color: #94A3B8;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+         table.dataTable thead th:first-child, /* Model column left align */
+         table.dataTable tbody td:first-child {
+            text-align: left;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #334155;
+        }
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_paginate {
+            color: #CBD5E1 !important;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+            background-color: #334155;
+            color: #E2E8F0;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 6px;
+        }
+         .dataTables_wrapper .dataTables_filter input {
+             margin-left: 0.5em;
+         }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: #CBD5E1 !important;
+            border: 1px solid #475569;
+            background: #334155;
+            margin: 0 2px;
+            border-radius: 4px;
+            padding: 0.4em 0.8em;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #FFFFFF !important;
+            background: linear-gradient(to right, #6D28D9, #4F46E5); /* Gradient for active paginate button */
+            border-color: #4F46E5;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #475569;
+            border-color: #64748B;
+            color: #FFFFFF !important;
+        }
+        /* DataTables Buttons Styling */
+        .dt-buttons .dt-button {
+            background-image: linear-gradient(to right, #3B82F6, #2563EB) !important;
+            color: white !important;
+            border: 1px solid #1D4ED8 !important;
+            border-radius: 4px !important;
+            padding: 0.4em 0.8em !important;
+            margin-left: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .dt-buttons .dt-button:hover {
+            filter: brightness(1.15) !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+        }
+
+
+        /* Riwayat Section */
+        .riwayat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .riwayat-card {
+            background-color: #0F172A;
+            background-image: linear-gradient(to bottom, #222c40, #0F172A); /* Subtle gradient for history cards */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border-left: 3px solid #4F46E5;
+        }
+        .riwayat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .riwayat-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #E2E8F0;
+        }
+        .riwayat-timestamp {
+            font-size: 0.8em;
+            color: #94A3B8;
+        }
+        .riwayat-body p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .riwayat-body strong {
+            color: #CBD5E1;
+        }
+        .riwayat-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .metric-item {
+            background-color: #1E293B;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #CBD5E1;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #020617;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #94A3B8;
+            font-size: 0.9em;
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        .validation-message {
+            color: #F87171;
+            font-size: 0.875em;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        mark.search-highlight {
+            background-color: #FBBF24; /* Kuning untuk highlight */
+            color: #0F172A;
+            padding: 0.1em;
+            border-radius: 3px;
+        }
+        mark.search-highlight-active {
+            background-color: #F97316; /* Oranye untuk highlight aktif */
+            color: #FFFFFF;
+        }
+
+        /* Contact Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* Pastikan di atas navbar */
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background-image: linear-gradient(to bottom, #2B2C61, #123F60);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            color: #E2E8F0;
+            animation: fadeInModal 0.3s ease-out;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.8em;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-close-btn:hover {
+            color: #FFFFFF;
+        }
+        .modal-title {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+        .modal-section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #CBD5E1;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 5px;
+        }
+        .social-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+        .social-media-link {
+            display: inline-block;
+            color: #E2E8F0;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .social-media-link svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+        }
+        .social-media-link:hover {
+            transform: scale(1.1);
+            color: #FFFFFF; /* Atau warna spesifik per platform */
+        }
+        .address-section p {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        .modal-footer-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.85em;
+            color: #94A3B8;
+        }
+        
+        /* Penyesuaian Responsif */
+        @media (max-width: 992px) { 
+             .form-grid {
+                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+             }
+             .alternatif-grid {
+                 grid-template-columns: 1.5fr repeat(3, 1fr);
+             }
+        }
+
+
+        @media (max-width: 768px) {
+            /* Tampilkan Tombol Toggle dan Sembunyikan Menu Desktop */
+            .navbar-toggle {
+                display: block; /* Tampilkan hamburger */
+            }
+            .navbar-menu {
+                display: none; /* Sembunyikan menu di mobile secara default */
+                position: absolute;
+                top: 100%; /* Posisi tepat di bawah navbar */
+                left: 0;
+                width: 100%;
+                background-color: #0F172A; /* Warna background dropdown */
+                flex-direction: column;
+                align-items: stretch; /* Item menu memenuhi lebar */
+                padding: 15px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                border-top: 1px solid #334155;
+            }
+
+            /* Kelas .active untuk menampilkan menu saat di-toggle */
+            .navbar-menu.active {
+                display: flex;
+            }
+            
+            .search-container {
+                margin-right: 0;
+                margin-bottom: 15px; /* Jarak ke bawah */
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            .search-input {
+                flex-grow: 1;
+            }
+            .contact-btn {
+                margin-right: 0;
+                width: 100%;
+                margin-bottom: 15px;
+                 justify-content: center; /* Center text and icon */
+            }
+            
+            /* Penyesuaian link di dalam menu mobile */
+            .nav-links {
+                margin-top: 0;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 5px; /* Jarak antar link */
+            }
+            .nav-links a {
+                margin-left: 0;
+                text-align: center;
+                padding: 12px;
+                border-radius: 6px; /* Sudut lebih rounded */
+            }
+            
+            /* Perbaikan untuk Tombol Contoh Input */
+            .main-title-container {
+                flex-direction: column; /* Tumpuk judul dan tombol secara vertikal */
+                align-items: flex-start; /* Rata kiri */
+            }
+             #contoh-input {
+                 width: auto; /* Lebar tombol menyesuaikan konten */
+                 align-self: flex-start; /* Pastikan tombol rata kiri */
+             }
+
+
+             .form-grid {
+                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+             }
+            .alternatif-grid {
+                grid-template-columns: 1fr; /* Tumpuk semua input alternatif */
+                gap: 12px;
+            }
+            .alternatif-grid .input-field {
+                text-align: left;
+            }
+             .button-container {
+                 flex-direction: column;
+             }
+             .btn {
+                 width: 100%;
+             }
+             .riwayat-metrics {
+                 grid-template-columns: 1fr;
+             }
+             .modal-content {
+                 padding: 20px;
+             }
+             .social-media-link svg {
+                 width: 28px;
+                 height: 28px;
+             }
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="https://placehold.co/40x40/6D28D9/FFFFFF?text=ML" alt="Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/40x40/6D28D9/FFFFFF?text=ML';">
+            Sistem Pemilihan Model ML
+        </div>
+        
+        <!-- Tombol Hamburger untuk Mobile -->
+        <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+            <svg viewBox="0 0 24 24">
+                <path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+            </svg>
+        </button>
+
+        <!-- Menu yang akan di-toggle -->
+        <div class="navbar-menu" id="navbarMenu">
+            <div class="search-container">
+                <input type="search" id="navbarSearchInput" placeholder="Search..." class="search-input">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <span id="searchResultsInfo" class="search-results-info"></span>
+            </div>
+            <button class="contact-btn" id="openContactModal">Contact Us</button>
+            <div class="nav-links">
+                <a href="#bobot-section">Bobot</a>
+                <a href="#input-alternatif-section">Input Alternatif</a>
+                <a href="#output-section">Output</a>
+                <a href="#riwayat-section">Riwayat</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container" id="mainPageContent">
+
+        <section id="halaman-utama" class="card">
+            <!-- Container baru untuk judul dan tombol -->
+            <div class="main-title-container">
+                <h2 class="card-title">Pemilihan Model Machine Learning Terbaik</h2>
+                <button id="contoh-input" class="btn btn-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z" clip-rule="evenodd" />
+                    </svg>
+                    Contoh Input
+                </button>
+            </div>
+
+
+            <div id="bobot-section" class="mb-8">
+                <h3 class="section-title">1. Masukkan Nilai Bobot (Skala 0-1)</h3>
+                <div id="bobot-validation-message" class="validation-message">Total bobot tidak boleh melebihi 1.</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="auc_bobot">AUC</label>
+                        <input type="number" id="auc_bobot" name="auc_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="f1_bobot">F1</label>
+                        <input type="number" id="f1_bobot" name="f1_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="prec_bobot">PREC</label>
+                        <input type="number" id="prec_bobot" name="prec_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="recall_bobot">RECALL</label>
+                        <input type="number" id="recall_bobot" name="recall_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mcc_bobot">MCC</label>
+                        <input type="number" id="mcc_bobot" name="mcc_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ca_bobot">CA</label>
+                        <input type="number" id="ca_bobot" name="ca_bobot" class="input-field bobot-input" placeholder="0.00" step="0.01" min="0" max="1">
+                    </div>
+                </div>
+            </div>
+
+            <div id="input-alternatif-section" class="mb-8">
+                <h3 class="section-title">2. Masukkan Nilai Alternatif</h3>
+                <div id="alternatif-validation-message" class="validation-message">Setiap nilai alternatif tidak boleh melebihi 1.</div>
+                <div id="alternatif-container">
+                    </div>
+                <div class="button-container space-between">
+                    <div>
+                        <button id="tambah-alternatif" class="btn btn-secondary" style="margin-right: 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            Tambah Alternatif
+                        </button>
+                        <button id="kurang-alternatif" class="btn btn-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1Z" clip-rule="evenodd" />
+                            </svg>
+                            Kurang Alternatif
+                        </button>
+                    </div>
+                    <button id="hitung" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                           <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                        </svg>
+                        Hitung
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="output-section" class="card">
+            <h2 class="card-title">Hasil Perhitungan</h2>
+
+            <div class="mb-8">
+                <h3 class="section-title" id="judul-tabel-normalisasi">3. Tabel Nilai Utilitas</h3>
+                <div class="table-container">
+                    <table id="tabelNormalisasi" class="display stripe hover row-border">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th class="text-center">AUC</th>
+                                <th class="text-center">F1</th>
+                                <th class="text-center">PREC</th>
+                                <th class="text-center">RECALL</th>
+                                <th class="text-center">MCC</th>
+                                <th class="text-center">CA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-normalisasi-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="section-title" id="judul-tabel-bobot">4. Tabel Utilitas Tertimbang per Kriteria</h3>
+                 <div class="table-container">
+                    <table id="tabelBobot" class="display stripe hover row-border">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th class="text-center">AUC</th>
+                                <th class="text-center">F1</th>
+                                <th class="text-center">PREC</th>
+                                <th class="text-center">RECALL</th>
+                                <th class="text-center">MCC</th>
+                                <th class="text-center">CA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-bobot-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="section-title">5. Tabel Perangkingan</h3>
+                <div class="table-container">
+                    <table id="tabelRanking" class="display stripe hover row-border">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th class="text-center">Total Utilitas</th>
+                                <th class="text-center">Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-ranking-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="text-center">
+                <button id="reset" class="btn btn-reset">Reset</button>
+            </div>
+        </section>
+
+        <section id="riwayat-section" class="card">
+            <div class="card-header-flex">
+                <h2 class="card-title" style="text-align: left;">Riwayat Perhitungan</h2>
+                <button id="reset-riwayat" class="btn btn-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path fill-rule="evenodd" d="M8.5 1.5A4.5 4.5 0 0 0 4 6v2H2.5A1.5 1.5 0 0 0 1 9.5v7A1.5 1.5 0 0 0 2.5 18h15a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 17.5 8H16V6a4.5 4.5 0 0 0-4.5-4.5h-3Zm-2.5 4.5c0-1.38.81-2.5 2-2.5h3c1.19 0 2 .941 2 2.5v2H6V6Z" clip-rule="evenodd" /> <path d="M6.293 6.293a1 1 0 0 1 1.414 0L10 8.586l2.293-2.293a1 1 0 1 1 1.414 1.414L11.414 10l2.293 2.293a1 1 0 0 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 0-1.414Z" /> </svg>
+                    Reset Riwayat
+                </button>
+            </div>
+            <div class="riwayat-grid" id="riwayat-container">
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; <span id="currentYear"></span> Muhammad Saman | All Rights Reserved</p>
+    </footer>
+
+    <div id="contactUsModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeContactModal" class="modal-close-btn">&times;</button>
+            <h3 class="modal-title">Hubungi Saya</h3>
+            
+            <div class="modal-section-title">Media Sosial</div>
+            <div class="social-media-grid">
+                <a href="#" class="social-media-link" title="WhatsApp" style="color: #25D366;">
+                    <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.35 3.45 16.86L2.05 22L7.31 20.62C8.76 21.41 10.37 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 6.46 17.5 2 12.04 2M12.04 3.67C16.56 3.67 20.28 7.39 20.28 11.92C20.28 16.45 16.56 20.17 12.04 20.17C10.52 20.17 9.06 19.78 7.8 19.07L7.58 18.95L4.37 19.82L5.28 16.71L5.14 16.46C4.32 15.11 3.8 13.54 3.8 11.91C3.8 7.39 7.52 3.67 12.04 3.67M17.26 14.63C17.01 14.54 15.84 13.96 15.61 13.87C15.37 13.79 15.2 13.74 15.03 14C14.86 14.24 14.32 14.83 14.18 15.02C14.04 15.22 13.89 15.24 13.65 15.15C13.41 15.07 12.58 14.81 11.59 13.92C10.81 13.22 10.28 12.37 10.13 12.12C9.99 11.88 10.11 11.74 10.23 11.62C10.34 11.5 10.49 11.31 10.62 11.16C10.74 11.01 10.79 10.89 10.91 10.69C11.03 10.5 10.98 10.33 10.91 10.18C10.83 10.03 10.33 8.86 10.13 8.37C9.94 7.88 9.75 7.92 9.61 7.91H9.28C9.11 7.91 8.89 7.96 8.71 8.2C8.53 8.45 8.03 8.9 8.03 9.99C8.03 11.08 8.74 12.03 8.86 12.18C8.98 12.32 10.33 14.35 12.28 15.14C12.92 15.42 13.38 15.56 13.75 15.65C14.34 15.79 14.82 15.76 15.2 15.7C15.62 15.62 16.79 15.04 17.04 14.79C17.29 14.54 17.29 14.35 17.26 14.26V14.24L17.26 14.63Z"></path></svg>
+                </a>
+                <a href="#" class="social-media-link" title="Telegram" style="color: #0088CC;">
+                    <svg viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23l7.68-6.92c.34-.31-.07-.49-.52-.32l-9.04 3.47c-.42.16-.41.41.03.53l2.98.94l6.87-4.32c.32-.21.62.02.43.25l-5.53 4.98l-.28 4.4c.08.42.37.54.69.33l1.87-1.81l3.08 2.26c.56.39 1.01.19.97-.48l1.14-10.91c.07-.65-.42-1.01-1.01-1.01L3.49 6.94c-.75.29-.74.76.08.97l2.33.74l1.96 6.12c.15.47.51.61.93.42Z"></path></svg>
+                </a>
+                <a href="#" class="social-media-link" title="Facebook" style="color: #1877F2;">
+                    <svg viewBox="0 0 24 24"><path d="M12 2.04C6.48 2.04 2 6.52 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 12 2.04Z"></path></svg>
+                </a>
+                <a href="#" class="social-media-link" title="Instagram" style="color: #E4405F;"> <svg viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"></path></svg>
+                </a>
+                <a href="#" class="social-media-link" title="X (Twitter)" style="color: #1DA1F2;"> <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+                </a>
+                <a href="#" class="social-media-link" title="LinkedIn" style="color: #0A66C2;">
+                    <svg viewBox="0 0 24 24"><path d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.5A1.49 1.49 0 0 1 14.41 12C15.26 12 15.71 12.69 15.71 13.5V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z"></path></svg>
+                </a>
+            </div>
+
+            <div class="modal-section-title">Alamat Saya</div>
+            <div class="address-section">
+                <p>Jl. Sungai Andai, Komp. Assalam, Blok.IV, No.29, Rt.40, Rw.02, Kelurahan Sungai Andai, Banjarmasin Utara</p>
+                <p>Kota Banjarmasin, Provinsi Kalimantan Selatan</p>
+                <p>Kode Pos: 70121</p>
+                <p>Indonesia</p>
+            </div>
+
+            <p class="modal-footer-text">Terima kasih telah menghubungi!</p>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+
+    <script>
+        let dtNormalisasi, dtBobot, dtRanking;
+        let searchMatches = [];
+        let currentMatchIndex = -1;
+        
+        function initDataTables() {
+            const commonTableOptions = {
+                responsive: true,
+                language: { 
+                    search: "", 
+                    searchPlaceholder: "Cari dalam tabel...",
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri",
+                    infoEmpty: "Menampilkan 0 hingga 0 dari 0 entri",
+                    infoFiltered: "(difilter dari _MAX_ total entri)",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    },
+                    emptyTable: "Tidak ada data tersedia dalam tabel",
+                    zeroRecords: "Tidak ditemukan data yang cocok",
+                },
+                dom: 'Bfrtip', 
+                buttons: [
+                    { extend: 'copy', text: 'Salin', exportOptions: { columns: ':visible' } },
+                    { extend: 'csv', text: 'CSV', exportOptions: { columns: ':visible' } },
+                    { extend: 'excel', text: 'Excel', exportOptions: { columns: ':visible' } },
+                    { extend: 'pdf', text: 'PDF', exportOptions: { columns: ':visible' } },
+                    { extend: 'print', text: 'Cetak', exportOptions: { columns: ':visible' } }
+                ],
+                columnDefs: [ 
+                    { className: "text-center", targets: "_all" },
+                    { className: "", targets: 0 } 
+                ]
+            };
+
+            if ($.fn.DataTable.isDataTable('#tabelNormalisasi')) {
+                dtNormalisasi.destroy();
+            }
+            if ($.fn.DataTable.isDataTable('#tabelBobot')) {
+                dtBobot.destroy();
+            }
+            if ($.fn.DataTable.isDataTable('#tabelRanking')) {
+                dtRanking.destroy();
+            }
+            
+            dtNormalisasi = $('#tabelNormalisasi').DataTable({...commonTableOptions});
+            dtBobot = $('#tabelBobot').DataTable({...commonTableOptions});
+            dtRanking = $('#tabelRanking').DataTable({
+                ...commonTableOptions,
+                columnDefs: [ 
+                    { className: "text-center", targets: [1, 2] }, 
+                    { className: "", targets: 0 } 
+                ]
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Variabel Elemen ---
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarMenu = document.getElementById('navbarMenu');
+            const alternatifContainer = document.getElementById('alternatif-container');
+            const tambahAlternatifButton = document.getElementById('tambah-alternatif');
+            const kurangAlternatifButton = document.getElementById('kurang-alternatif');
+            const hitungButton = document.getElementById('hitung');
+            const resetButton = document.getElementById('reset');
+            const contohInputButton = document.getElementById('contoh-input');
+            const bobotInputs = document.querySelectorAll('.bobot-input');
+            const bobotValidationMessage = document.getElementById('bobot-validation-message');
+            const alternatifValidationMessage = document.getElementById('alternatif-validation-message');
+            const navbarSearchInput = document.getElementById('navbarSearchInput');
+            const searchResultsInfo = document.getElementById('searchResultsInfo');
+            const mainPageContent = document.getElementById('mainPageContent');
+            const resetRiwayatButton = document.getElementById('reset-riwayat');
+            const contactUsModal = document.getElementById('contactUsModal');
+            const openContactModalButton = document.getElementById('openContactModal');
+            const closeContactModalButton = document.getElementById('closeContactModal');
+
+            // --- Logika Navbar Toggle ---
+            if (navbarToggle && navbarMenu) {
+                navbarToggle.addEventListener('click', () => {
+                    navbarMenu.classList.toggle('active');
+                });
+                
+                // Menutup menu saat link di dalamnya diklik (untuk navigasi halaman)
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (navbarMenu.classList.contains('active')) {
+                           navbarMenu.classList.remove('active');
+                        }
+                    });
+                });
+            }
+
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            function createAlternatifRow() {
+                const div = document.createElement('div');
+                div.className = 'alternatif-grid'; 
+                div.innerHTML = `
+                    <input type="text" placeholder="Model" class="input-field">
+                    <input type="number" placeholder="AUC" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                    <input type="number" placeholder="F1" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                    <input type="number" placeholder="PREC" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                    <input type="number" placeholder="RECALL" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                    <input type="number" placeholder="MCC" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                    <input type="number" placeholder="CA" class="input-field alternatif-metric-input" step="0.01" min="0" max="1">
+                `;
+                div.querySelectorAll('.alternatif-metric-input').forEach(input => {
+                    input.addEventListener('input', validateAlternatifInput);
+                });
+                return div;
+            }
+            
+            function validateAlternatifInput(event) {
+                const input = event.target;
+                if (parseFloat(input.value) > 1) {
+                    input.value = '1'; 
+                    alternatifValidationMessage.textContent = 'Nilai metrik alternatif tidak boleh lebih dari 1.';
+                    alternatifValidationMessage.style.display = 'block';
+                    input.classList.add('is-invalid');
+                } else if (parseFloat(input.value) < 0) {
+                    input.value = '0'; 
+                } else {
+                    input.classList.remove('is-invalid');
+                    let allValid = true;
+                    document.querySelectorAll('.alternatif-metric-input').forEach(inp => {
+                        if (inp.classList.contains('is-invalid')) {
+                            allValid = false;
+                        }
+                    });
+                    if (allValid) {
+                        alternatifValidationMessage.style.display = 'none';
+                    }
+                }
+            }
+
+            if (alternatifContainer.children.length === 0) {
+                 alternatifContainer.appendChild(createAlternatifRow());
+            }
+
+            tambahAlternatifButton.addEventListener('click', function () {
+                alternatifContainer.appendChild(createAlternatifRow());
+            });
+
+            kurangAlternatifButton.addEventListener('click', function () {
+                if (alternatifContainer.children.length > 1) { 
+                    alternatifContainer.removeChild(alternatifContainer.lastChild);
+                } else {
+                    showCustomMessage("Minimal harus ada satu baris alternatif.", "warning", alternatifValidationMessage);
+                }
+            });
+            
+            function showCustomMessage(message, type = "error", element) {
+                element.textContent = message;
+                element.style.color = type === "error" ? "#F87171" : (type === "warning" ? "#FBBF24" : "#34D399");
+                element.style.display = 'block';
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 3000); 
+            }
+
+            bobotInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    let totalBobot = 0;
+                    bobotInputs.forEach(bInput => {
+                        const val = parseFloat(bInput.value);
+                        if (!isNaN(val)) {
+                            if (val > 1) bInput.value = '1'; 
+                            if (val < 0) bInput.value = '0'; 
+                            totalBobot += parseFloat(bInput.value) || 0;
+                        }
+                    });
+
+                    if (totalBobot > 1) {
+                        bobotValidationMessage.textContent = `Total bobot (${totalBobot.toFixed(2)}) tidak boleh melebihi 1.`;
+                        bobotValidationMessage.style.display = 'block';
+                    } else {
+                        bobotValidationMessage.style.display = 'none';
+                    }
+                });
+            });
+
+            hitungButton.addEventListener('click', function() {
+                let totalBobot = 0;
+                bobotInputs.forEach(input => {
+                    totalBobot += parseFloat(input.value) || 0;
+                });
+
+                if (totalBobot > 1) {
+                    bobotValidationMessage.textContent = `Total bobot (${totalBobot.toFixed(2)}) tidak boleh melebihi 1. Silakan sesuaikan.`;
+                    bobotValidationMessage.style.display = 'block';
+                    return; 
+                } else {
+                    bobotValidationMessage.style.display = 'none';
+                }
+                
+                const alternatifDataCheck = getAlternatifData();
+                if (alternatifDataCheck.length > 0 && totalBobot === 0) {
+                    // Tetap lanjutkan perhitungan, hasil akan 0 jika semua bobot 0
+                }
+
+
+                let alternatifMetricsValid = true;
+                document.querySelectorAll('.alternatif-metric-input').forEach(input => {
+                    const value = parseFloat(input.value);
+                     if (isNaN(value) || value < 0 || value > 1) {
+                        input.classList.add('is-invalid');
+                        alternatifMetricsValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!alternatifMetricsValid) {
+                    alternatifValidationMessage.textContent = 'Pastikan semua nilai metrik alternatif antara 0 dan 1.';
+                    alternatifValidationMessage.style.display = 'block';
+                    return; 
+                } else {
+                    alternatifValidationMessage.style.display = 'none';
+                }
+
+                console.log("Tombol Hitung diklik. Validasi berhasil.");
+                document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+                populateTablesWithCalculatedData(); 
+            });
+
+            resetButton.addEventListener('click', function() {
+                console.log("Tombol Reset diklik.");
+                ['auc_bobot', 'f1_bobot', 'prec_bobot', 'recall_bobot', 'mcc_bobot', 'ca_bobot'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.value = '';
+                        element.classList.remove('is-invalid');
+                    }
+                });
+                bobotValidationMessage.style.display = 'none';
+                alternatifValidationMessage.style.display = 'none';
+
+                alternatifContainer.innerHTML = '';
+                alternatifContainer.appendChild(createAlternatifRow());
+                
+                if (dtNormalisasi) dtNormalisasi.destroy();
+                if (dtBobot) dtBobot.destroy();
+                if (dtRanking) dtRanking.destroy();
+                
+                $('#tabel-normalisasi-body').empty();
+                $('#tabel-bobot-body').empty();
+                $('#tabel-ranking-body').empty();
+                
+                addExampleTableDataToHTML(); 
+                initDataTables(); 
+
+                document.getElementById('halaman-utama').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            contohInputButton.addEventListener('click', function() {
+                document.getElementById('auc_bobot').value = '0.20';
+                document.getElementById('f1_bobot').value = '0.15';
+                document.getElementById('prec_bobot').value = '0.15';
+                document.getElementById('recall_bobot').value = '0.15';
+                document.getElementById('mcc_bobot').value = '0.15';
+                document.getElementById('ca_bobot').value = '0.20'; 
+                bobotValidationMessage.style.display = 'none'; 
+
+                alternatifContainer.innerHTML = '';
+                const contohAlternatif = [
+                    { model: "SVM Linier", auc: 0.88, f1: 0.76, prec: 0.90, recall: 0.68, mcc: 0.72, ca: 0.92 },
+                    { model: "Random Forest", auc: 0.92, f1: 0.85, prec: 0.89, recall: 0.82, mcc: 0.80, ca: 0.94 },
+                    { model: "Naive Bayes", auc: 0.75, f1: 0.65, prec: 0.70, recall: 0.60, mcc: 0.55, ca: 0.85 }
+                ];
+
+                contohAlternatif.forEach(alt => {
+                    const row = createAlternatifRow();
+                    alternatifContainer.appendChild(row); // Append first
+                    const inputs = row.querySelectorAll('.input-field');
+                    inputs[0].value = alt.model;
+                    inputs[1].value = alt.auc;
+                    inputs[2].value = alt.f1;
+                    inputs[3].value = alt.prec;
+                    inputs[4].value = alt.recall;
+                    inputs[5].value = alt.mcc;
+                    inputs[6].value = alt.ca;
+                    row.querySelectorAll('.alternatif-metric-input').forEach(inp => inp.classList.remove('is-invalid'));
+                });
+                alternatifValidationMessage.style.display = 'none'; 
+                console.log("Contoh input telah diisi.");
+            });
+
+            resetRiwayatButton.addEventListener('click', function() {
+                historyData = [];
+                localStorage.removeItem('spkMlHistoryV3');
+                displayHistory();
+                showCustomMessage("Riwayat perhitungan telah dihapus.", "success", bobotValidationMessage); 
+            });
+
+            // Contact Us Modal Logic
+            openContactModalButton.addEventListener('click', function() {
+                contactUsModal.style.display = 'flex';
+            });
+            closeContactModalButton.addEventListener('click', function() {
+                contactUsModal.style.display = 'none';
+            });
+            contactUsModal.addEventListener('click', function(event) {
+                if (event.target === contactUsModal) { // Klik pada overlay
+                    contactUsModal.style.display = 'none';
+                }
+            });
+
+
+            function populateTablesWithCalculatedData() {
+                if (dtNormalisasi) dtNormalisasi.destroy();
+                $('#tabel-normalisasi-body').empty();
+
+                if (dtBobot) dtBobot.destroy();
+                $('#tabel-bobot-body').empty();
+
+                if (dtRanking) dtRanking.destroy();
+                $('#tabel-ranking-body').empty();
+
+                const alternatifData = getAlternatifData(); 
+                const bobotData = getBobotData(); 
+                const kriteria = ['auc', 'f1', 'prec', 'recall', 'mcc', 'ca']; 
+
+                if (alternatifData.length === 0) {
+                    console.warn("Tidak ada data alternatif untuk dihitung.");
+                    initDataTables(); 
+                    return;
+                }
+
+                const minMaxValues = {};
+                kriteria.forEach(k => {
+                    const values = alternatifData.map(alt => alt[k]);
+                    minMaxValues[k] = {
+                        min: Math.min(...values),
+                        max: Math.max(...values)
+                    };
+                });
+                
+                const utilityData = alternatifData.map(alt => {
+                    const utilityValues = { model: alt.model };
+                    let rowNormalisasiHtml = `<tr><td>${alt.model}</td>`;
+                    kriteria.forEach(k => {
+                        const x_ij = alt[k];
+                        const min_j = minMaxValues[k].min;
+                        const max_j = minMaxValues[k].max;
+                        let u_ij = 0;
+                        if (max_j - min_j !== 0) {
+                            u_ij = (x_ij - min_j) / (max_j - min_j);
+                        } else if (max_j > 0) { 
+                            u_ij = 1;
+                        } 
+                        
+                        utilityValues[k] = u_ij;
+                        rowNormalisasiHtml += `<td class="text-center">${u_ij.toFixed(3)}</td>`;
+                    });
+                    rowNormalisasiHtml += `</tr>`;
+                    $('#tabel-normalisasi-body').append(rowNormalisasiHtml);
+                    return utilityValues;
+                });
+
+                const rankingDataSource = [];
+                utilityData.forEach((utilAlt, index) => {
+                    let totalUtility = 0;
+                    let rowBobotHtml = `<tr><td>${utilAlt.model}</td>`;
+                    kriteria.forEach(k => {
+                        const weightedUtility = utilAlt[k] * bobotData[k];
+                        rowBobotHtml += `<td class="text-center">${weightedUtility.toFixed(3)}</td>`;
+                        totalUtility += weightedUtility;
+                    });
+                    rowBobotHtml += `</tr>`;
+                    $('#tabel-bobot-body').append(rowBobotHtml);
+                    rankingDataSource.push({ model: utilAlt.model, finalScore: totalUtility });
+                });
+
+                rankingDataSource.sort((a, b) => b.finalScore - a.finalScore);
+                rankingDataSource.forEach((item, rankIndex) => {
+                    $('#tabel-ranking-body').append(
+                        `<tr>
+                            <td>${item.model}</td>
+                            <td class="text-center">${item.finalScore.toFixed(4)}</td>
+                            <td class="text-center font-semibold text-lg">${rankIndex + 1}</td>
+                        </tr>`
+                    );
+                });
+                
+                initDataTables(); 
+
+                if (rankingDataSource.length > 0) {
+                    const bestAlternatifOriginal = alternatifData.find(a => a.model === rankingDataSource[0].model);
+                    if (bestAlternatifOriginal) { 
+                       saveToHistory(rankingDataSource[0], bobotData, bestAlternatifOriginal);
+                    }
+                }
+            }
+            
+            function getBobotData() {
+                const data = {};
+                ['auc_bobot', 'f1_bobot', 'prec_bobot', 'recall_bobot', 'mcc_bobot', 'ca_bobot'].forEach(id => {
+                    data[id.replace('_bobot', '')] = parseFloat(document.getElementById(id).value) || 0;
+                });
+                return data;
+            }
+
+            function getAlternatifData() {
+                const rows = alternatifContainer.querySelectorAll('.alternatif-grid');
+                const data = [];
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('.input-field');
+                    if (inputs[0].value.trim() !== "") { 
+                         data.push({
+                            model: inputs[0].value,
+                            auc: parseFloat(inputs[1].value) || 0,
+                            f1: parseFloat(inputs[2].value) || 0,
+                            prec: parseFloat(inputs[3].value) || 0,
+                            recall: parseFloat(inputs[4].value) || 0,
+                            mcc: parseFloat(inputs[5].value) || 0,
+                            ca: parseFloat(inputs[6].value) || 0,
+                        });
+                    }
+                });
+                return data;
+            }
+
+            const riwayatContainer = document.getElementById('riwayat-container');
+            let historyData = JSON.parse(localStorage.getItem('spkMlHistoryV3')) || []; 
+
+            function displayHistory() {
+                riwayatContainer.innerHTML = ''; 
+                const recentHistory = historyData.slice(-6).reverse(); 
+
+                recentHistory.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'riwayat-card';
+                    let metricsHtml = '';
+                    if (item.originalMetrics) {
+                        metricsHtml = `
+                            <span class="metric-item">AUC: ${item.originalMetrics.auc !== undefined ? item.originalMetrics.auc.toFixed(2) : 'N/A'}</span>
+                            <span class="metric-item">F1: ${item.originalMetrics.f1 !== undefined ? item.originalMetrics.f1.toFixed(2) : 'N/A'}</span>
+                            <span class="metric-item">PREC: ${item.originalMetrics.prec !== undefined ? item.originalMetrics.prec.toFixed(2) : 'N/A'}</span>
+                            <span class="metric-item">RECALL: ${item.originalMetrics.recall !== undefined ? item.originalMetrics.recall.toFixed(2) : 'N/A'}</span>
+                            <span class="metric-item">MCC: ${item.originalMetrics.mcc !== undefined ? item.originalMetrics.mcc.toFixed(2) : 'N/A'}</span>
+                            <span class="metric-item">CA: ${item.originalMetrics.ca !== undefined ? item.originalMetrics.ca.toFixed(2) : 'N/A'}</span>
+                        `;
+                    }
+                    card.innerHTML = `
+                        <div class="riwayat-header">
+                            <h4 class="riwayat-title">${item.user || 'Anonymous'}</h4>
+                            <span class="riwayat-timestamp">${new Date(item.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short'})}</span>
+                        </div>
+                        <div class="riwayat-body">
+                            <p><strong>Model Terbaik:</strong> ${item.bestModel ? item.bestModel.model : 'N/A'}</p>
+                            <p><strong>Total Utilitas:</strong> ${item.bestModel && item.bestModel.finalScore !== undefined ? item.bestModel.finalScore.toFixed(4) : 'N/A'}</p>
+                            ${item.originalMetrics ? `<div class="section-title" style="font-size: 0.9em; margin-top:10px; margin-bottom: 5px;">Metrik Asli Model Terbaik:</div><div class="riwayat-metrics">${metricsHtml}</div>` : ''}
+                        </div>
+                    `;
+                    riwayatContainer.appendChild(card);
+                });
+                 if (recentHistory.length === 0) {
+                      riwayatContainer.innerHTML = '<p style="color: #94A3B8; text-align: center; padding: 20px 0;">Belum ada riwayat perhitungan.</p>';
+                 }
+            }
+            
+            function saveToHistory(bestModelData, bobotValues, originalMetricsData) {
+                if (!originalMetricsData) { 
+                    console.error("Data metrik asli tidak ditemukan untuk model terbaik.");
+                    originalMetricsData = { auc: 0, f1: 0, prec: 0, recall: 0, mcc: 0, ca: 0 }; 
+                }
+                const newHistoryItem = {
+                    user: "Anonymous", 
+                    timestamp: new Date().toISOString(),
+                    bestModel: bestModelData, 
+                    bobot: bobotValues,
+                    originalMetrics: originalMetricsData 
+                };
+                historyData.push(newHistoryItem);
+                localStorage.setItem('spkMlHistoryV3', JSON.stringify(historyData)); 
+                displayHistory(); 
+            }
+
+            displayHistory();
+
+            document.querySelectorAll('.nav-links a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            function addExampleTableDataToHTML() {
+                const normalisasiBody = $('#tabel-normalisasi-body');
+                const bobotBody = $('#tabel-bobot-body');
+                const rankingBody = $('#tabel-ranking-body');
+
+                normalisasiBody.html(`
+                    <tr>
+                        <td>Contoh Model A</td><td class="text-center">0.000</td><td class="text-center">0.000</td>
+                        <td class="text-center">0.000</td><td class="text-center">0.000</td><td class="text-center">0.000</td>
+                        <td class="text-center">0.000</td>
+                    </tr>`);
+                bobotBody.html(`
+                    <tr>
+                        <td>Contoh Model A</td><td class="text-center">0.000</td><td class="text-center">0.000</td>
+                        <td class="text-center">0.000</td><td class="text-center">0.000</td><td class="text-center">0.000</td>
+                        <td class="text-center">0.000</td>
+                    </tr>`);
+                rankingBody.html(`
+                     <tr>
+                        <td>Contoh Model A</td><td class="text-center">0.0000</td><td class="text-center font-semibold text-lg">1</td>
+                    </tr>`);
+            }
+            
+            addExampleTableDataToHTML();  
+            initDataTables(); 
+
+            // --- Navbar Search Functionality ---
+            function removeHighlights() {
+                const highlightedElements = mainPageContent.querySelectorAll('mark.search-highlight, mark.search-highlight-active');
+                highlightedElements.forEach(mark => {
+                    const parent = mark.parentNode;
+                    while (mark.firstChild) {
+                        parent.insertBefore(mark.firstChild, mark);
+                    }
+                    parent.removeChild(mark);
+                    parent.normalize(); 
+                });
+            }
+
+            function highlightText(searchTerm) {
+                removeHighlights(); 
+                if (!searchTerm.trim()) {
+                    searchResultsInfo.style.display = 'none';
+                    return [];
+                }
+
+                const regex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                let matches = [];
+                
+                function findInNode(node) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        let match;
+                        let nodeContent = node.textContent; 
+                        let currentPos = 0;
+                        let resultFragment = document.createDocumentFragment();
+
+                        while ((match = regex.exec(nodeContent)) !== null) {
+                            if (match[0].length > 0) {
+                                if (match.index > currentPos) {
+                                    resultFragment.appendChild(document.createTextNode(nodeContent.substring(currentPos, match.index)));
+                                }
+                                const mark = document.createElement('mark');
+                                mark.className = 'search-highlight';
+                                mark.textContent = match[0];
+                                resultFragment.appendChild(mark);
+                                matches.push(mark);
+                                currentPos = regex.lastIndex;
+                            } else {
+                                regex.lastIndex++; 
+                            }
+                        }
+                        if (currentPos < nodeContent.length) {
+                            resultFragment.appendChild(document.createTextNode(nodeContent.substring(currentPos)));
+                        }
+
+                        if (resultFragment.childNodes.length > 0) {
+                            node.parentNode.replaceChild(resultFragment, node);
+                        }
+
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        // Pengecualian yang lebih spesifik untuk tidak mencari di dalam tabel hasil atau kontrol DataTables
+                        if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE' && 
+                            node.nodeName !== 'INPUT' && node.nodeName !== 'TEXTAREA' &&
+                            !node.classList.contains('dt-button') && // Hindari tombol datatables
+                            !node.closest('#output-section .table-container') && // Hindari konten dalam tabel hasil
+                            !node.closest('.dataTables_wrapper') // Hindari semua elemen DataTables wrapper
+                            ) { 
+                            Array.from(node.childNodes).forEach(child => findInNode(child));
+                        }
+                    }
+                }
+                
+                findInNode(mainPageContent);
+                return matches;
+            }
+
+
+            navbarSearchInput.addEventListener('keyup', function(event) {
+                const searchTerm = event.target.value;
+
+                if (event.key === 'Enter') {
+                    if (searchMatches.length > 0) {
+                        currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
+                        navigateToMatch(currentMatchIndex);
+                    }
+                    event.preventDefault(); 
+                } else if (event.key === 'Backspace' && searchTerm.length === 0) { 
+                    removeHighlights();
+                    searchMatches = [];
+                    currentMatchIndex = -1;
+                    searchResultsInfo.style.display = 'none';
+                } else if (searchTerm.length > 1) { 
+                    searchMatches = highlightText(searchTerm); 
+                    currentMatchIndex = -1; 
+                    if (searchMatches.length > 0) {
+                        currentMatchIndex = 0;
+                        navigateToMatch(0);
+                        searchResultsInfo.textContent = `1/${searchMatches.length}`;
+                        searchResultsInfo.style.display = 'inline';
+                    } else {
+                        searchResultsInfo.textContent = '0/0';
+                        searchResultsInfo.style.display = 'inline';
+                         removeHighlights(); 
+                    }
+                } else if (searchTerm.length === 0) { 
+                     removeHighlights();
+                     searchMatches = [];
+                     currentMatchIndex = -1;
+                     searchResultsInfo.style.display = 'none';
+                }
+            });
+            
+            navbarSearchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && event.shiftKey) { 
+                     if (searchMatches.length > 0) {
+                        currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+                        navigateToMatch(currentMatchIndex);
+                    }
+                    event.preventDefault();
+                }
+            });
+
+
+            function navigateToMatch(index) {
+                searchMatches.forEach((match, i) => {
+                    match.classList.remove('search-highlight-active');
+                    if (i === index) {
+                        match.classList.add('search-highlight-active');
+                        match.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                    }
+                });
+                if (searchMatches.length > 0) {
+                    searchResultsInfo.textContent = `${index + 1}/${searchMatches.length}`;
+                }
+            }
+
+        });
+    </script>
+
+</body>
+</html>
